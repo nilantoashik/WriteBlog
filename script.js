@@ -7,6 +7,34 @@ let viewingUser = null; // user currently being viewed on profile page
 let allUsers = [];
 let allPosts = [];
 
+// Username utilities
+function normalizeUsernameInput(value, fallback = 'user') {
+    const base = (value || fallback || 'user')
+        .toLowerCase()
+        .replace(/[^a-z0-9._]/g, '')
+        .replace(/\.{2,}/g, '.')
+        .replace(/_{2,}/g, '_')
+        .replace(/^\.+|\.+$/g, '')
+        .replace(/^_+|_+$/g, '');
+    return base.length >= 3 ? base : `${base}user`.slice(0, Math.max(3, base.length + 4));
+}
+
+function generateUniqueUsername(base, excludeUserId = null) {
+    let candidate = base || 'user';
+    let counter = 1;
+    while (allUsers.some(u => u.username === candidate && u.id !== excludeUserId)) {
+        candidate = `${base}${counter}`;
+        counter += 1;
+    }
+    return candidate;
+}
+
+function ensureUserHasUsername(user) {
+    const normalized = normalizeUsernameInput(user.username || user.name || 'user');
+    user.username = generateUniqueUsername(normalized, user.id);
+    return user;
+}
+
 // Initialize data from localStorage
 function initializeData() {
     const storedUsers = localStorage.getItem('blogUsers');
@@ -14,7 +42,7 @@ function initializeData() {
     const storedCurrentUser = localStorage.getItem('currentUser');
     
     if (storedUsers) {
-        allUsers = JSON.parse(storedUsers);
+        allUsers = JSON.parse(storedUsers).map(u => ensureUserHasUsername(u));
     }
     
     if (storedPosts) {
@@ -86,6 +114,7 @@ function handleRegister(event) {
     event.preventDefault();
     
     const name = document.getElementById('regName').value;
+    const usernameInput = document.getElementById('regUsername')?.value || '';
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     const bio = document.getElementById('regBio').value;
@@ -96,9 +125,15 @@ function handleRegister(event) {
         return;
     }
     
+    const normalizedUsername = normalizeUsernameInput(usernameInput || name);
+    if (allUsers.some(u => u.username === normalizedUsername)) {
+        showNotification('Username already taken', 'error');
+        return;
+    }
     const newUser = {
         id: generateId(),
         name: name,
+        username: normalizedUsername,
         email: email,
         password: password,
         bio: bio || 'No bio yet',
@@ -163,9 +198,11 @@ async function handleSocialLogin(provider) {
             
             if (!user) {
                 // Create new user via social login
+                const normalizedUsername = generateUniqueUsername(normalizeUsernameInput(userName, userName));
                 user = {
                     id: generateId(),
                     name: userName,
+                    username: normalizedUsername,
                     email: userEmail,
                     password: generateId(), // Random password for social accounts
                     bio: `Joined via ${providerName}`,
@@ -411,6 +448,7 @@ function createUserCard(user) {
         <div class="user-card">
             <img src="${user.avatar}" alt="${user.name}" class="user-card-avatar">
             <h3 class="user-card-name">${user.name}</h3>
+            <p class="user-card-handle">@${user.username}</p>
             <p class="user-card-bio">${user.bio}</p>
             <div class="user-card-stats">
                 <div class="user-stat">
@@ -446,7 +484,8 @@ function searchUsers() {
     
     const filteredUsers = otherUsers.filter(user => 
         user.name.toLowerCase().includes(searchTerm) ||
-        user.bio.toLowerCase().includes(searchTerm)
+        user.bio.toLowerCase().includes(searchTerm) ||
+        (`@${user.username}`).toLowerCase().includes(searchTerm)
     );
     
     const exploreContainer = document.getElementById('exploreUsers');
@@ -555,6 +594,8 @@ function loadProfile() {
 
     // Profile header for viewed user
     document.getElementById('profileName').textContent = viewingUser.name;
+    const handleEl = document.getElementById('profileHandle');
+    if (handleEl) handleEl.textContent = '@' + viewingUser.username;
     document.getElementById('profileBio').textContent = viewingUser.bio;
     document.getElementById('profileAvatar').src = viewingUser.avatar;
     document.getElementById('profileCover').style.display = viewingUser.coverPhoto ? 'none' : 'block';
@@ -642,6 +683,8 @@ window.viewUserProfile = viewUserProfile;
 function showEditProfile() {
     document.getElementById('editProfileModal').style.display = 'flex';
     document.getElementById('editName').value = currentUser.name;
+    const usernameInput = document.getElementById('editUsername');
+    if (usernameInput) usernameInput.value = currentUser.username;
     document.getElementById('editBio').value = currentUser.bio;
     document.getElementById('editAvatar').value = currentUser.avatar;
     document.getElementById('editAvatarPreview').src = currentUser.avatar;
@@ -742,11 +785,23 @@ function handleUpdateProfile(event) {
     event.preventDefault();
     
     const newName = document.getElementById('editName').value;
+    const newUsernameInput = document.getElementById('editUsername')?.value || '';
     const newBio = document.getElementById('editBio').value;
     const newAvatar = document.getElementById('editAvatar').value;
     const newCover = document.getElementById('editCover').value;
+
+    const normalizedUsername = normalizeUsernameInput(newUsernameInput || newName);
+    if (normalizedUsername.length < 3) {
+        showNotification('Username must be at least 3 characters', 'error');
+        return;
+    }
+    if (allUsers.some(u => u.username === normalizedUsername && u.id !== currentUser.id)) {
+        showNotification('Username already taken', 'error');
+        return;
+    }
     
     currentUser.name = newName;
+    currentUser.username = normalizedUsername;
     currentUser.bio = newBio;
     if (newAvatar) {
         currentUser.avatar = newAvatar;

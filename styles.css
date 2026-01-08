@@ -1421,6 +1421,14 @@ a {
   letter-spacing: -0.01em;
 }
 
+.user-card-handle {
+  color: var(--text-tertiary);
+  margin-top: -0.35rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
 .user-card-bio {
   color: var(--text-secondary);
   font-size: 1rem;
@@ -2178,6 +2186,13 @@ body.theme-orange {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.profile-handle {
+  font-weight: 700;
+  color: var(--text-tertiary);
+  margin-top: -0.2rem;
+  margin-bottom: 0.5rem;
 }
 
 .profile-email {
