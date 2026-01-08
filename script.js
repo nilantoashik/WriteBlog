@@ -52,16 +52,34 @@ function initializeData() {
         }
     }
     
-    if (storedUsers) {
-        allUsers = JSON.parse(storedUsers).map(u => ensureUserHasUsername(u));
+    try {
+        if (storedUsers) {
+            allUsers = JSON.parse(storedUsers).map(u => ensureUserHasUsername(u));
+        }
+    } catch (e) {
+        console.warn('Resetting users due to parse error', e.message);
+        allUsers = [];
+        localStorage.removeItem('blogUsers');
     }
     
-    if (storedPosts) {
-        allPosts = JSON.parse(storedPosts);
+    try {
+        if (storedPosts) {
+            allPosts = JSON.parse(storedPosts);
+        }
+    } catch (e) {
+        console.warn('Resetting posts due to parse error', e.message);
+        allPosts = [];
+        localStorage.removeItem('blogPosts');
     }
     
-    if (storedCurrentUser) {
-        currentUser = JSON.parse(storedCurrentUser);
+    try {
+        if (storedCurrentUser) {
+            currentUser = ensureUserHasUsername(JSON.parse(storedCurrentUser));
+        }
+    } catch (e) {
+        console.warn('Resetting currentUser due to parse error', e.message);
+        currentUser = null;
+        localStorage.removeItem('currentUser');
     }
 }
 
@@ -72,6 +90,12 @@ function saveData() {
     if (currentUser) {
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
     }
+}
+
+// Save and set current user
+function saveCurrentUser(user) {
+    currentUser = ensureUserHasUsername(user);
+    saveData();
 }
 
 // Generate unique ID
