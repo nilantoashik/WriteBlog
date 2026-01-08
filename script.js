@@ -37,9 +37,20 @@ function ensureUserHasUsername(user) {
 
 // Initialize data from localStorage
 function initializeData() {
-    const storedUsers = localStorage.getItem('blogUsers');
+    // Primary keys
+    let storedUsers = localStorage.getItem('blogUsers');
     const storedPosts = localStorage.getItem('blogPosts');
     const storedCurrentUser = localStorage.getItem('currentUser');
+
+    // Migrate from legacy key 'users' if present
+    if (!storedUsers) {
+        const legacyUsers = localStorage.getItem('users');
+        if (legacyUsers) {
+            storedUsers = legacyUsers;
+            localStorage.setItem('blogUsers', legacyUsers);
+            localStorage.removeItem('users');
+        }
+    }
     
     if (storedUsers) {
         allUsers = JSON.parse(storedUsers).map(u => ensureUserHasUsername(u));
@@ -595,6 +606,8 @@ function loadProfile() {
     document.getElementById('profileName').textContent = viewingUser.name;
     const handleEl = document.getElementById('profileHandle');
     if (handleEl) handleEl.textContent = '@' + viewingUser.username;
+    const emailEl = document.getElementById('profileEmail');
+    if (emailEl) emailEl.textContent = viewingUser.email || '';
     document.getElementById('profileBio').textContent = viewingUser.bio;
     document.getElementById('profileAvatar').src = viewingUser.avatar;
     document.getElementById('profileCover').style.display = viewingUser.coverPhoto ? 'none' : 'block';
