@@ -16,7 +16,7 @@ A modern, responsive blog platform with social features built with HTML, CSS, Ja
 
 ## 🚀 Live Demo
 
-Visit: [Your GitHub Pages URL]
+Visit: `https://YOUR_USERNAME.github.io/writeblog/login.html` (replace YOUR_USERNAME with your GitHub username)
 
 ## 🛠️ Tech Stack
 
@@ -150,4 +150,4 @@ For issues and questions, please open an issue on GitHub.
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by WriteBlog Contributors
