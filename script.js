@@ -702,19 +702,6 @@ function viewUserProfile(userId) {
 }
 window.handleProfileFollow = handleProfileFollow;
 window.viewUserProfile = viewUserProfile;
-            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-                <i class="fas fa-pen" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
-                <h3>No posts yet</h3>
-                <p>Start sharing your thoughts with the world!</p>
-                <button class="btn btn-primary" onclick="showCreatePost()" style="margin-top: 20px;">Create Post</button>
-            </div>
-        `;
-        return;
-    }
-    
-    const sortedPosts = userPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    userPostsContainer.innerHTML = sortedPosts.map(post => createPostCard(post)).join('');
-}
 
 function showEditProfile() {
     document.getElementById('editProfileModal').style.display = 'flex';
