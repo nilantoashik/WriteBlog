@@ -217,10 +217,9 @@ async function handleSocialLogin(provider) {
                 allUsers.push(user);
             }
             
-            // Save and login
-            localStorage.setItem('users', JSON.stringify(allUsers));
+            // Save and login (use primary storage keys)
             currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            saveData();
             
             showNotification(`Welcome, ${user.name}!`, 'success');
             
