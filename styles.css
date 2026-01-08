@@ -1472,6 +1472,17 @@ a {
   z-index: 1;
 }
 
+.user-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.user-card .btn-secondary {
+  width: 100%;
+  justify-content: center;
+}
+
 .btn-follow:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
@@ -2227,6 +2238,13 @@ body.theme-orange {
   grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
   margin: 1.25rem 0 1rem;
+}
+
+.profile-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: 1rem;
 }
 
 .stat-card {

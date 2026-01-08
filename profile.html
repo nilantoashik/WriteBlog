@@ -143,10 +143,16 @@
                                 </div>
                             </div>
                             
-                            <button class="btn btn-primary" onclick="showEditProfile()">
-                                <i class="fas fa-edit"></i>
-                                <span>Edit Profile</span>
-                            </button>
+                            <div class="profile-actions">
+                                <button id="editProfileButton" class="btn btn-primary" onclick="showEditProfile()">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Edit Profile</span>
+                                </button>
+                                <button id="profileFollowButton" class="btn btn-primary" style="display: none;" onclick="handleProfileFollow()">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Follow</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     

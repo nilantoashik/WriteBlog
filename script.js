@@ -3,6 +3,7 @@
 // ========================================
 
 let currentUser = null;
+let viewingUser = null; // user currently being viewed on profile page
 let allUsers = [];
 let allPosts = [];
 
@@ -425,10 +426,16 @@ function createUserCard(user) {
                     <span class="user-stat-label">Following</span>
                 </div>
             </div>
-            <button class="btn ${isFollowing ? 'btn-following' : 'btn-primary'} btn-follow" 
-                    onclick="toggleFollow('${user.id}')">
-                ${isFollowing ? 'Following' : 'Follow'}
-            </button>
+            <div class="user-card-actions">
+                <button class="btn btn-secondary" onclick="viewUserProfile('${user.id}')">
+                    <i class="fas fa-user"></i>
+                    <span>View Profile</span>
+                </button>
+                <button class="btn ${isFollowing ? 'btn-following' : 'btn-primary'} btn-follow" 
+                        onclick="toggleFollow('${user.id}')">
+                    ${isFollowing ? 'Following' : 'Follow'}
+                </button>
+            </div>
         </div>
     `;
 }
@@ -526,36 +533,35 @@ function clearPostForm() {
     document.getElementById('postTags').value = '';
 }
 
-function deletePost(postId) {
-    if (confirm('Are you sure you want to delete this post?')) {
-        allPosts = allPosts.filter(p => p.id !== postId);
-        saveData();
-        showNotification('Post deleted successfully', 'success');
-        
-        // Refresh current view
-        if (document.getElementById('feedSection').style.display !== 'none') {
-            loadFeed();
-        } else if (document.getElementById('profileSection').style.display !== 'none') {
-            loadProfile();
-        }
-    }
-}
-
-// ========================================
-// Profile Functions
-// ========================================
-
 function loadProfile() {
-    // Update profile information
-    document.getElementById('profileName').textContent = currentUser.name;
-    document.getElementById('profileEmail').textContent = currentUser.email;
-    document.getElementById('profileBio').textContent = currentUser.bio;
-    document.getElementById('profileAvatar').src = currentUser.avatar;
-    
-    // Apply cover photo if exists
+    // Determine which user to view (supports profile.html?user=<id>)
+    const params = new URLSearchParams(window.location.search);
+    const userIdParam = params.get('user');
+    viewingUser = currentUser;
+    if (userIdParam) {
+        const found = allUsers.find(u => u.id === userIdParam);
+        if (found) viewingUser = found;
+    }
+    const isOwnProfile = viewingUser.id === currentUser.id;
+
+    // Apply theme and nav info (always current user for nav)
+    document.body.className = 'theme-blue';
+    document.getElementById('navUserName').textContent = currentUser.name;
+    document.getElementById('navUserAvatar').src = currentUser.avatar;
+    document.getElementById('mobileUserAvatar').src = currentUser.avatar;
+    document.getElementById('sidebarUserName').textContent = currentUser.name;
+    document.getElementById('sidebarUserEmail').textContent = currentUser.email;
+    document.getElementById('sidebarUserAvatar').src = currentUser.avatar;
+
+    // Profile header for viewed user
+    document.getElementById('profileName').textContent = viewingUser.name;
+    document.getElementById('profileBio').textContent = viewingUser.bio;
+    document.getElementById('profileAvatar').src = viewingUser.avatar;
+    document.getElementById('profileCover').style.display = viewingUser.coverPhoto ? 'none' : 'block';
+    document.getElementById('profileCoverImage').style.display = viewingUser.coverPhoto ? 'block' : 'none';
+    document.getElementById('profileCoverImage').style.backgroundImage = viewingUser.coverPhoto ? `url(${viewingUser.coverPhoto})` : 'none';
     const coverElement = document.getElementById('profileCoverImage');
-    if (currentUser.coverPhoto) {
-        coverElement.style.backgroundImage = `url(${currentUser.coverPhoto})`;
+    if (viewingUser.coverPhoto) {
         coverElement.style.backgroundSize = 'cover';
         coverElement.style.backgroundPosition = 'center';
     } else {
@@ -563,16 +569,62 @@ function loadProfile() {
     }
     
     // Update stats
-    const userPosts = allPosts.filter(p => p.userId === currentUser.id);
+    const userPosts = allPosts.filter(p => p.userId === viewingUser.id);
     document.getElementById('postCount').textContent = userPosts.length;
-    document.getElementById('followerCount').textContent = currentUser.followers.length;
-    document.getElementById('followingCount').textContent = currentUser.following.length;
+    document.getElementById('followerCount').textContent = viewingUser.followers.length;
+    document.getElementById('followingCount').textContent = viewingUser.following.length;
+    
+    // Toggle profile actions (edit vs follow)
+    const editBtn = document.getElementById('editProfileButton');
+    const followBtn = document.getElementById('profileFollowButton');
+    if (editBtn && followBtn) {
+        if (isOwnProfile) {
+            editBtn.style.display = 'inline-flex';
+            followBtn.style.display = 'none';
+        } else {
+            editBtn.style.display = 'none';
+            followBtn.style.display = 'inline-flex';
+            const isFollowing = currentUser.following.includes(viewingUser.id);
+            followBtn.className = `btn ${isFollowing ? 'btn-following' : 'btn-primary'}`;
+            const icon = followBtn.querySelector('i');
+            const label = followBtn.querySelector('span');
+            if (icon && label) {
+                icon.className = isFollowing ? 'fas fa-user-check' : 'fas fa-user-plus';
+                label.textContent = isFollowing ? 'Following' : 'Follow';
+            }
+        }
+    }
     
     // Load user's posts
     const userPostsContainer = document.getElementById('userPosts');
     
     if (userPosts.length === 0) {
         userPostsContainer.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                <i class="fas fa-pen" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h3>No posts yet</h3>
+                <p>${isOwnProfile ? 'Start sharing your thoughts with the world!' : 'This user has not posted yet.'}</p>
+                ${isOwnProfile ? '<button class="btn btn-primary" onclick="showCreatePost()" style="margin-top: 20px;">Create Post</button>' : ''}
+            </div>
+        `;
+        return;
+    }
+    
+    const sortedPosts = userPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    userPostsContainer.innerHTML = sortedPosts.map(post => createPostCard(post)).join('');
+}
+
+function handleProfileFollow() {
+    if (!viewingUser || viewingUser.id === currentUser.id) return;
+    toggleFollow(viewingUser.id);
+    loadProfile();
+}
+
+function viewUserProfile(userId) {
+    window.location.href = `profile.html?user=${userId}`;
+}
+window.handleProfileFollow = handleProfileFollow;
+window.viewUserProfile = viewUserProfile;
             <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
                 <i class="fas fa-pen" style="font-size: 64px; margin-bottom: 20px; opacity: 0.3;"></i>
                 <h3>No posts yet</h3>
