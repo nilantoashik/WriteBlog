@@ -288,8 +288,22 @@ function showExplore() {
 }
 
 function showCreatePost() {
-    setActiveNav('createSection');
-    document.querySelector('[onclick="showCreatePost()"]').classList.add('active');
+    const modal = document.getElementById('createPostModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeCreatePost() {
+    const modal = document.getElementById('createPostModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        clearPostForm();
+        currentTags = [];
+        renderTags();
+    }
 }
 
 function showProfile() {
@@ -491,10 +505,6 @@ function handleCreatePost(event) {
     const content = document.getElementById('postContent').value;
     const image = document.getElementById('postImage').value;
     const link = document.getElementById('postLink').value;
-    const tags = document.getElementById('postTags').value
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
     
     const newPost = {
         id: generateId(),
@@ -503,16 +513,20 @@ function handleCreatePost(event) {
         content: content,
         image: image,
         link: link,
-        tags: tags,
+        tags: [...currentTags],
         createdAt: new Date().toISOString()
     };
     
     allPosts.unshift(newPost);
     saveData();
     
-    clearPostForm();
+    closeCreatePost();
     showNotification('Post published successfully!', 'success');
-    showFeed();
+    
+    // Reload the feed if on feed page
+    if (window.location.pathname.includes('feed.html')) {
+        loadFeed();
+    }
 }
 
 function clearPostForm() {
@@ -520,7 +534,17 @@ function clearPostForm() {
     document.getElementById('postContent').value = '';
     document.getElementById('postImage').value = '';
     document.getElementById('postLink').value = '';
-    document.getElementById('postTags').value = '';
+    const tagInput = document.getElementById('tagInput');
+    if (tagInput) tagInput.value = '';
+    
+    // Clear tag counters
+    const titleCount = document.getElementById('titleCount');
+    const contentCount = document.getElementById('contentCount');
+    if (titleCount) titleCount.textContent = '0';
+    if (contentCount) contentCount.textContent = '0';
+    
+    // Clear image preview
+    removeImagePreview();
 }
 
 function deletePost(postId) {
@@ -994,6 +1018,7 @@ function handleTagInput(event) {
 
 function renderTags() {
     const container = document.getElementById('tagsContainer');
+    if (!container) return;
     container.innerHTML = currentTags.map(tag => `
         <span class="tag-item">
             ${tag}
@@ -1020,8 +1045,10 @@ function previewImage() {
 }
 
 function removeImagePreview() {
-    document.getElementById('postImage').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
+    const imageInput = document.getElementById('postImage');
+    const preview = document.getElementById('imagePreview');
+    if (imageInput) imageInput.value = '';
+    if (preview) preview.style.display = 'none';
 }
 
 // Character counters
