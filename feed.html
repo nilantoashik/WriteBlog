@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - WriteBlog</title>
+    <meta name="description" content="Your personal feed - Latest posts from people you follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=16.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="db-adapter.js"></script>
+</head>
+<body>
+    <!-- Main App Section -->
+    <div id="appSection" class="app-section">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon-small">
+                        <i class="fas fa-blog"></i>
+                    </div>
+                    <span class="sidebar-logo-text">WriteBlog</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="feed.html" class="nav-link active">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="explore.html" class="nav-link">
+                    <i class="fas fa-compass"></i>
+                    <span>Explore</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="trending.html" class="nav-link">
+                    <i class="fas fa-fire"></i>
+                    <span>Trending</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="bookmarks.html" class="nav-link">
+                    <i class="fas fa-bookmark"></i>
+                    <span>Bookmarks</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="profile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                    <div class="nav-indicator"></div>
+                </a>
+            </nav>
+            
+            <button class="btn-create-post" onclick="showCreatePost()">
+                <i class="fas fa-pen"></i>
+                <span>Create Post</span>
+            </button>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <img src="" id="sidebarUserAvatar" alt="User" class="sidebar-avatar">
+                    <div class="sidebar-user-info">
+                        <span class="sidebar-user-name" id="sidebarUserName"></span>
+                        <span class="sidebar-user-email" id="sidebarUserEmail"></span>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="handleLogout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mobile-logo">
+                <i class="fas fa-blog"></i>
+                <span>WriteBlog</span>
+            </div>
+            <img src="" id="mobileUserAvatar" alt="User" class="mobile-avatar" onclick="window.location.href='profile.html'">
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Feed Section -->
+            <section id="feedSection" class="content-section">
+                <div class="section-header">
+                    <div>
+                        <h1 class="section-title">Your Feed</h1>
+                        <p class="section-subtitle">Latest posts from people you follow</p>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterFeed('all')">All</button>
+                        <button class="filter-btn" onclick="filterFeed('today')">Today</button>
+                        <button class="filter-btn" onclick="filterFeed('week')">This Week</button>
+                    </div>
+                </div>
+                <div id="feedPosts" class="posts-container">
+                    <!-- Skeleton Loading -->
+                    <div class="skeleton-post">
+                        <div class="skeleton-header">
+                            <div class="skeleton-avatar"></div>
+                            <div class="skeleton-info">
+                                <div class="skeleton-line short"></div>
+                                <div class="skeleton-line shorter"></div>
+                            </div>
+                        </div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-image"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav">
+            <a href="feed.html" class="mobile-nav-link active">
+                <i class="fas fa-home"></i>
+                <span>Feed</span>
+            </a>
+            <a href="explore.html" class="mobile-nav-link">
+                <i class="fas fa-compass"></i>
+                <span>Explore</span>
+            </a>
+            <button class="mobile-nav-link mobile-create-btn" onclick="showCreatePost()">
+                <i class="fas fa-plus"></i>
+                <span>Create</span>
+            </button>
+            <a href="bookmarks.html" class="mobile-nav-link">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
+            </a>
+            <a href="profile.html" class="mobile-nav-link">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeCreatePost()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Create New Post</h3>
+                <button class="modal-close" onclick="closeCreatePost()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleCreatePost(event)" class="create-form">
+                <div class="form-group">
+                    <label for="postTitle">Title</label>
+                    <input type="text" id="postTitle" maxlength="150" required placeholder="Give your post a captivating title...">
+                    <div class="char-counter"><span id="titleCount">0</span>/150</div>
+                </div>
+                <div class="form-group">
+                    <label for="postContent">Content</label>
+                    <textarea id="postContent" rows="8" maxlength="5000" required placeholder="Share your story..."></textarea>
+                    <div class="char-counter"><span id="contentCount">0</span>/5000</div>
+                </div>
+                <div class="form-group">
+                    <label for="postImage">Image URL (Optional)</label>
+                    <input type="url" id="postImage" placeholder="https://example.com/image.jpg" onchange="previewImage(this.value)">
+                    <div id="imagePreview" class="image-preview" style="display:none;">
+                        <img src="" alt="Preview">
+                        <button type="button" class="remove-preview" onclick="removeImagePreview()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="postLink">External Link (Optional)</label>
+                    <input type="url" id="postLink" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="tags-input-wrapper">
+                        <div class="tags-container" id="tagsContainer"></div>
+                        <input type="text" id="tagInput" placeholder="Add tags..." onkeydown="handleTagInput(event)">
+                    </div>
+                    <small class="form-hint">Press Enter or comma to add tags</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreatePost()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Publish Post</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Supabase and data
+            try {
+                if (typeof initSupabase === 'function') initSupabase();
+                if (typeof initializeData === 'function') initializeData();
+            } catch (e) {}
+            
+            // Handle OAuth callback
+            if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured() && typeof supabase !== 'undefined' && supabase) {
+                try {
+                    const { data: { session }, error } = await supabase.auth.getSession();
+                    if (session && session.user) {
+                        // OAuth login successful - create/update user
+                        const authUser = session.user;
+                        let user = await getUserByEmail(authUser.email);
+                        
+                        if (!user) {
+                            // Create new user from OAuth
+                            user = await createUser({
+                                name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email.split('@')[0],
+                                email: authUser.email,
+                                password: generateId(),
+                                bio: 'Joined via social login',
+                                avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || getDefaultAvatar(authUser.email),
+                                socialProvider: authUser.app_metadata?.provider || 'oauth'
+                            });
+                        }
+                        
+                        // Set as current user
+                        currentUser = user;
+                        saveCurrentUser(user);
+                        showNotification(`Welcome back, ${user.name}!`, 'success');
+                    }
+                } catch (error) {
+                    console.log('OAuth callback check:', error.message);
+                }
+            }
+            
+            // Check authentication
+            if (typeof currentUser === 'undefined' || !currentUser) {
+                window.location.href = 'login.html';
+            } else {
+                // Initialize page
+                document.body.className = 'theme-blue';
+                if (typeof updateSidebarInfo === 'function') updateSidebarInfo();
+                if (typeof showFeed === 'function') showFeed();
+            }
+        });
+    </script>
+</body>
+</html>

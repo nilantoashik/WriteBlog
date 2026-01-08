@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - WriteBlog</title>
+    <meta name="description" content="Your profile on WriteBlog">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=16.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="db-adapter.js"></script>
+</head>
+<body>
+    <!-- Main App Section -->
+    <div id="appSection" class="app-section">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="logo-icon-small">
+                        <i class="fas fa-blog"></i>
+                    </div>
+                    <span class="sidebar-logo-text">WriteBlog</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="feed.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="explore.html" class="nav-link">
+                    <i class="fas fa-compass"></i>
+                    <span>Explore</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="trending.html" class="nav-link">
+                    <i class="fas fa-fire"></i>
+                    <span>Trending</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="bookmarks.html" class="nav-link">
+                    <i class="fas fa-bookmark"></i>
+                    <span>Bookmarks</span>
+                    <div class="nav-indicator"></div>
+                </a>
+                <a href="profile.html" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                    <div class="nav-indicator"></div>
+                </a>
+            </nav>
+            
+            <button class="btn-create-post" onclick="showCreatePost()">
+                <i class="fas fa-pen"></i>
+                <span>Create Post</span>
+            </button>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <img src="" id="sidebarUserAvatar" alt="User" class="sidebar-avatar">
+                    <div class="sidebar-user-info">
+                        <span class="sidebar-user-name" id="sidebarUserName"></span>
+                        <span class="sidebar-user-email" id="sidebarUserEmail"></span>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="handleLogout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mobile-logo">
+                <i class="fas fa-blog"></i>
+                <span>WriteBlog</span>
+            </div>
+            <img src="" id="mobileUserAvatar" alt="User" class="mobile-avatar" onclick="window.location.href='profile.html'">
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Profile Section -->
+            <section id="profileSection" class="content-section">
+                <div class="profile-cover" id="profileCoverImage">
+                    <div class="profile-cover-gradient"></div>
+                    <button class="cover-edit-btn" onclick="document.getElementById('coverPhotoInput').click()" title="Change Cover Photo">
+                        <i class="fas fa-camera"></i>
+                        <span>Change Cover</span>
+                    </button>
+                    <input type="file" id="coverPhotoInput" accept="image/*" style="display: none;" onchange="handleCoverUpload(event)">
+                </div>
+                <div class="profile-main">
+                    <div class="profile-header-card">
+                        <div class="profile-avatar-container">
+                            <img src="" id="profileAvatar" alt="Profile" class="profile-avatar-large">
+                            <button class="avatar-edit-btn" onclick="showEditProfile()">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div class="profile-info">
+                            <h1 id="profileName" class="profile-name"></h1>
+                            <p id="profileEmail" class="profile-email"></p>
+                            <p id="profileBio" class="profile-bio"></p>
+                            
+                            <div class="profile-stats-row">
+                                <div class="stat-card">
+                                    <i class="fas fa-pen-fancy"></i>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="postCount">0</span>
+                                        <span class="stat-label">Posts</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <i class="fas fa-users"></i>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="followerCount">0</span>
+                                        <span class="stat-label">Followers</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <i class="fas fa-user-plus"></i>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="followingCount">0</span>
+                                        <span class="stat-label">Following</span>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <i class="fas fa-heart"></i>
+                                    <div class="stat-content">
+                                        <span class="stat-number" id="likeCount">0</span>
+                                        <span class="stat-label">Likes</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary" onclick="showEditProfile()">
+                                <i class="fas fa-edit"></i>
+                                <span>Edit Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" onclick="showProfileTab('posts')">
+                            <i class="fas fa-th"></i>
+                            <span>Posts</span>
+                        </button>
+                        <button class="tab-btn" onclick="showProfileTab('analytics')">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </button>
+                    </div>
+                    
+                    <div id="profilePostsTab" class="tab-content active">
+                        <div id="userPosts" class="posts-container"></div>
+                    </div>
+                    
+                    <div id="profileAnalyticsTab" class="tab-content" style="display: none;">
+                        <div class="analytics-grid">
+                            <div class="analytics-card">
+                                <h3>Engagement Overview</h3>
+                                <div class="analytics-chart">
+                                    <div class="chart-bar" style="--height: 60%">
+                                        <span class="bar-label">Mon</span>
+                                    </div>
+                                    <div class="chart-bar" style="--height: 80%">
+                                        <span class="bar-label">Tue</span>
+                                    </div>
+                                    <div class="chart-bar" style="--height: 45%">
+                                        <span class="bar-label">Wed</span>
+                                    </div>
+                                    <div class="chart-bar" style="--height: 90%">
+                                        <span class="bar-label">Thu</span>
+                                    </div>
+                                    <div class="chart-bar" style="--height: 70%">
+                                        <span class="bar-label">Fri</span>
+                                    </div>
+                                    <div class="chart-bar" style="--height: 55%">
+                                        <span class="bar-label">Sat</span>
+                                    </div>
+                                    <div class="chart-bar" style="--height: 65%">
+                                        <span class="bar-label">Sun</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <h3>Top Performing Post</h3>
+                                <div class="top-post-preview">
+                                    <i class="fas fa-trophy"></i>
+                                    <p>Your most engaging content coming soon!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav">
+            <a href="feed.html" class="mobile-nav-link">
+                <i class="fas fa-home"></i>
+                <span>Feed</span>
+            </a>
+            <a href="explore.html" class="mobile-nav-link">
+                <i class="fas fa-compass"></i>
+                <span>Explore</span>
+            </a>
+            <button class="mobile-nav-link mobile-create-btn" onclick="showCreatePost()">
+                <i class="fas fa-plus"></i>
+                <span>Create</span>
+            </button>
+            <a href="bookmarks.html" class="mobile-nav-link">
+                <i class="fas fa-bookmark"></i>
+                <span>Saved</span>
+            </a>
+            <a href="profile.html" class="mobile-nav-link active">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeEditProfile()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <button class="modal-close" onclick="closeEditProfile()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleUpdateProfile(event)" class="modal-form">
+                <div class="form-group">
+                    <label for="editName">Display Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="editName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editBio">Bio</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-pen"></i>
+                        <textarea id="editBio" rows="4" placeholder="Tell the world about yourself..."></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editCover">Cover Photo</label>
+                    <div class="cover-upload-section">
+                        <div class="cover-preview-container">
+                            <div id="editCoverPreview" class="cover-preview"></div>
+                            <div class="cover-upload-overlay">
+                                <i class="fas fa-image"></i>
+                                <span>Change Cover</span>
+                            </div>
+                        </div>
+                        <div class="cover-upload-options">
+                            <input type="file" id="coverFileInput" accept="image/*" style="display: none;" onchange="handleCoverModalUpload(event)">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('coverFileInput').click()">
+                                <i class="fas fa-upload"></i> Upload Cover
+                            </button>
+                            <div class="input-wrapper" style="margin-top: 0.75rem;">
+                                <i class="fas fa-link"></i>
+                                <input type="url" id="editCover" placeholder="Or paste cover image URL">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editAvatar">Avatar</label>
+                    <div class="avatar-upload-section">
+                        <div class="avatar-preview-container">
+                            <img id="editAvatarPreview" src="" alt="Avatar Preview" class="avatar-preview">
+                            <div class="avatar-upload-overlay">
+                                <i class="fas fa-camera"></i>
+                                <span>Change Photo</span>
+                            </div>
+                        </div>
+                        <div class="avatar-upload-options">
+                            <input type="file" id="avatarFileInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('avatarFileInput').click()">
+                                <i class="fas fa-upload"></i> Upload Image
+                            </button>
+                            <div class="input-wrapper" style="margin-top: 0.75rem;">
+                                <i class="fas fa-link"></i>
+                                <input type="url" id="editAvatar" placeholder="Or paste image URL">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditProfile()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div id="createPostModal" class="modal" style="display: none;">
+        <div class="modal-backdrop" onclick="closeCreatePost()"></div>
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Create New Post</h3>
+                <button class="modal-close" onclick="closeCreatePost()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form onsubmit="handleCreatePost(event)" class="create-form">
+                <div class="form-group">
+                    <label for="postTitle">Title</label>
+                    <input type="text" id="postTitle" maxlength="150" required placeholder="Give your post a captivating title...">
+                    <div class="char-counter"><span id="titleCount">0</span>/150</div>
+                </div>
+                <div class="form-group">
+                    <label for="postContent">Content</label>
+                    <textarea id="postContent" rows="8" maxlength="5000" required placeholder="Share your story..."></textarea>
+                    <div class="char-counter"><span id="contentCount">0</span>/5000</div>
+                </div>
+                <div class="form-group">
+                    <label for="postImage">Image URL (Optional)</label>
+                    <input type="url" id="postImage" placeholder="https://example.com/image.jpg" onchange="previewImage(this.value)">
+                    <div id="imagePreview" class="image-preview" style="display:none;">
+                        <img src="" alt="Preview">
+                        <button type="button" class="remove-preview" onclick="removeImagePreview()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="postLink">External Link (Optional)</label>
+                    <input type="url" id="postLink" placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <div class="tags-input-wrapper">
+                        <div class="tags-container" id="tagsContainer"></div>
+                        <input type="text" id="tagInput" placeholder="Add tags..." onkeydown="handleTagInput(event)">
+                    </div>
+                    <small class="form-hint">Press Enter or comma to add tags</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreatePost()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Publish Post</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async function() {
+            // Initialize Supabase and data
+            try {
+                if (typeof initSupabase === 'function') initSupabase();
+                if (typeof initializeData === 'function') initializeData();
+            } catch (e) {}
+            
+            // Handle OAuth callback
+            if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured() && typeof supabase !== 'undefined' && supabase) {
+                try {
+                    const { data: { session }, error } = await supabase.auth.getSession();
+                    if (session && session.user) {
+                        const authUser = session.user;
+                        let user = await getUserByEmail(authUser.email);
+                        
+                        if (!user) {
+                            user = await createUser({
+                                name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email.split('@')[0],
+                                email: authUser.email,
+                                password: generateId(),
+                                bio: 'Joined via social login',
+                                avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || getDefaultAvatar(authUser.email),
+                                socialProvider: authUser.app_metadata?.provider || 'oauth'
+                            });
+                        }
+                        
+                        currentUser = user;
+                        saveCurrentUser(user);
+                        showNotification(`Welcome, ${user.name}!`, 'success');
+                    }
+                } catch (error) {
+                    console.log('OAuth callback check:', error.message);
+                }
+            }
+            
+            // Check authentication
+            if (typeof currentUser === 'undefined' || !currentUser) {
+                window.location.href = 'login.html';
+            } else {
+                // Initialize page
+                document.body.className = 'theme-blue';
+                if (typeof updateSidebarInfo === 'function') updateSidebarInfo();
+                if (typeof loadProfile === 'function') loadProfile();
+            }
+        });
+    </script>
+</body>
+</html>
