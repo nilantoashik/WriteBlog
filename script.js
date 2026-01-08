@@ -288,22 +288,8 @@ function showExplore() {
 }
 
 function showCreatePost() {
-    const modal = document.getElementById('createPostModal');
-    if (modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-}
-
-function closeCreatePost() {
-    const modal = document.getElementById('createPostModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        clearPostForm();
-        currentTags = [];
-        renderTags();
-    }
+    setActiveNav('createSection');
+    document.querySelector('[onclick="showCreatePost()"]').classList.add('active');
 }
 
 function showProfile() {
@@ -505,6 +491,10 @@ function handleCreatePost(event) {
     const content = document.getElementById('postContent').value;
     const image = document.getElementById('postImage').value;
     const link = document.getElementById('postLink').value;
+    const tags = document.getElementById('postTags').value
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
     
     const newPost = {
         id: generateId(),
@@ -513,20 +503,16 @@ function handleCreatePost(event) {
         content: content,
         image: image,
         link: link,
-        tags: [...currentTags],
+        tags: tags,
         createdAt: new Date().toISOString()
     };
     
     allPosts.unshift(newPost);
     saveData();
     
-    closeCreatePost();
+    clearPostForm();
     showNotification('Post published successfully!', 'success');
-    
-    // Reload the feed if on feed page
-    if (window.location.pathname.includes('feed.html')) {
-        loadFeed();
-    }
+    showFeed();
 }
 
 function clearPostForm() {
@@ -534,17 +520,7 @@ function clearPostForm() {
     document.getElementById('postContent').value = '';
     document.getElementById('postImage').value = '';
     document.getElementById('postLink').value = '';
-    const tagInput = document.getElementById('tagInput');
-    if (tagInput) tagInput.value = '';
-    
-    // Clear tag counters
-    const titleCount = document.getElementById('titleCount');
-    const contentCount = document.getElementById('contentCount');
-    if (titleCount) titleCount.textContent = '0';
-    if (contentCount) contentCount.textContent = '0';
-    
-    // Clear image preview
-    removeImagePreview();
+    document.getElementById('postTags').value = '';
 }
 
 function deletePost(postId) {
@@ -1018,7 +994,6 @@ function handleTagInput(event) {
 
 function renderTags() {
     const container = document.getElementById('tagsContainer');
-    if (!container) return;
     container.innerHTML = currentTags.map(tag => `
         <span class="tag-item">
             ${tag}
@@ -1034,6 +1009,24 @@ function removeTag(tag) {
     renderTags();
 }
 
+// Modal control functions
+function openCreatePost() {
+    const modal = document.getElementById('createPostModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeCreatePost() {
+    const modal = document.getElementById('createPostModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        clearPostForm();
+    }
+}
+
 // Image preview
 function previewImage() {
     const url = document.getElementById('postImage').value;
@@ -1045,10 +1038,8 @@ function previewImage() {
 }
 
 function removeImagePreview() {
-    const imageInput = document.getElementById('postImage');
-    const preview = document.getElementById('imagePreview');
-    if (imageInput) imageInput.value = '';
-    if (preview) preview.style.display = 'none';
+    document.getElementById('postImage').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
 }
 
 // Character counters

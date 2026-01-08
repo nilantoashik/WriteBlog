@@ -2847,6 +2847,51 @@ body.theme-orange {
   color: var(--text-secondary);
 }
 
+/* ========================================
+   Floating Action Button (FAB)
+   ======================================== */
+
+.fab {
+  position: fixed;
+  bottom: 90px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-full);
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 
+    0 4px 20px rgba(37, 99, 235, 0.4),
+    0 8px 40px rgba(37, 99, 235, 0.2);
+  transition: all var(--transition-base);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 
+    0 6px 30px rgba(37, 99, 235, 0.5),
+    0 12px 50px rgba(37, 99, 235, 0.3);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fab i {
+  transition: transform var(--transition-base);
+}
+
+.fab:hover i {
+  transform: rotate(90deg);
+}
+
 .profile-theme-selector {
   margin: 2rem 0;
   padding: 2rem;
@@ -3165,6 +3210,15 @@ body.theme-orange {
   
   .mobile-bottom-nav {
     display: flex;
+  }
+
+  /* FAB positioning for mobile */
+  .fab {
+    bottom: 90px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    font-size: 1.25rem;
   }
   
   /* Hide desktop sidebar by default */
