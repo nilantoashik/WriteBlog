@@ -515,6 +515,9 @@ function handleCreatePost(event) {
     showFeed();
 }
 
+// Make handleCreatePost globally accessible
+window.handleCreatePost = handleCreatePost;
+
 function clearPostForm() {
     document.getElementById('postTitle').value = '';
     document.getElementById('postContent').value = '';
@@ -1009,12 +1012,19 @@ function removeTag(tag) {
     renderTags();
 }
 
+// Make tag functions globally accessible
+window.handleTagInput = handleTagInput;
+window.renderTags = renderTags;
+window.removeTag = removeTag;
+
 // Modal control functions
 function openCreatePost() {
     const modal = document.getElementById('createPostModal');
     if (modal) {
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
+    } else {
+        console.error('Create post modal not found');
     }
 }
 
@@ -1026,6 +1036,10 @@ function closeCreatePost() {
         clearPostForm();
     }
 }
+
+// Make functions globally accessible
+window.openCreatePost = openCreatePost;
+window.closeCreatePost = closeCreatePost;
 
 // Image preview
 function previewImage() {
@@ -1041,6 +1055,10 @@ function removeImagePreview() {
     document.getElementById('postImage').value = '';
     document.getElementById('imagePreview').style.display = 'none';
 }
+
+// Make image functions globally accessible
+window.previewImage = previewImage;
+window.removeImagePreview = removeImagePreview;
 
 // Character counters
 document.addEventListener('DOMContentLoaded', () => {
