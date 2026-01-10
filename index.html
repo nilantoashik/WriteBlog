@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css?v=16.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="db-adapter.js"></script>
 </head>
 <body>
     <!-- Loading Screen -->
@@ -98,6 +101,14 @@
                             <i class="fas fa-user"></i>
                             <input type="text" id="regName" placeholder="John Doe" required>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="regUsername"><i class="fas fa-at"></i> Username</label>
+                        <div class="form-input">
+                            <i class="fas fa-at"></i>
+                            <input type="text" id="regUsername" placeholder="yourname" minlength="3" pattern="[A-Za-z0-9._]+">
+                        </div>
+                        <small class="form-hint">Only letters, numbers, dots, and underscores. Must be unique.</small>
                     </div>
                     <div class="form-group">
                         <label for="regEmail"><i class="fas fa-envelope"></i> Email Address</label>
@@ -326,7 +337,7 @@
                                     <i class="fas fa-image"></i>
                                     Cover Image URL
                                 </label>
-                                <input type="url" id="postImage" placeholder="https://example.com/image.jpg" onchange="previewImage()">
+                                <input type="url" id="postImage" placeholder="https://example.com/image.jpg" onchange="previewImage(this.value)">
                                 <div id="imagePreview" class="image-preview" style="display: none;">
                                     <img src="" alt="Preview">
                                     <button type="button" class="remove-preview" onclick="removeImagePreview()">

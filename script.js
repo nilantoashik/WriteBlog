@@ -314,15 +314,20 @@ async function handleSocialLogin(provider) {
 }
 
 function showApp() {
-    document.getElementById('authSection').style.display = 'none';
-    document.getElementById('appSection').style.display = 'block';
+    const authSection = document.getElementById('authSection');
+    const appSection = document.getElementById('appSection');
+    
+    if (authSection) authSection.style.display = 'none';
+    if (appSection) appSection.style.display = 'block';
     
     // Apply user theme
-    document.body.className = 'theme-' + currentUser.theme;
+    document.body.className = 'theme-' + (currentUser?.theme || 'blue');
     
     // Update navigation user info
-    document.getElementById('navUserName').textContent = currentUser.name;
-    document.getElementById('navUserAvatar').src = currentUser.avatar;
+    const navUserName = document.getElementById('navUserName');
+    const navUserAvatar = document.getElementById('navUserAvatar');
+    if (navUserName) navUserName.textContent = currentUser.name;
+    if (navUserAvatar) navUserAvatar.src = currentUser.avatar;
     
     // Update sidebar user info
     updateSidebarInfo();
@@ -344,30 +349,58 @@ function setActiveNav(section) {
         sec.style.display = 'none';
     });
     
-    document.getElementById(section).style.display = 'block';
+    const sectionElement = document.getElementById(section);
+    if (sectionElement) {
+        sectionElement.style.display = 'block';
+    }
 }
 
 function showFeed() {
-    setActiveNav('feedSection');
-    document.querySelector('[onclick="showFeed()"]').classList.add('active');
-    loadFeed();
+    const feedSection = document.getElementById('feedSection');
+    if (feedSection) {
+        setActiveNav('feedSection');
+        const navLink = document.querySelector('[onclick="showFeed()"]');
+        if (navLink) navLink.classList.add('active');
+        loadFeed();
+    } else {
+        // Navigate to feed page if not on single-page app
+        window.location.href = 'feed.html';
+    }
 }
 
 function showExplore() {
-    setActiveNav('exploreSection');
-    document.querySelector('[onclick="showExplore()"]').classList.add('active');
-    loadExplore();
+    const exploreSection = document.getElementById('exploreSection');
+    if (exploreSection) {
+        setActiveNav('exploreSection');
+        const navLink = document.querySelector('[onclick="showExplore()"]');
+        if (navLink) navLink.classList.add('active');
+        loadExplore();
+    } else {
+        window.location.href = 'explore.html';
+    }
 }
 
 function showCreatePost() {
-    setActiveNav('createSection');
-    document.querySelector('[onclick="showCreatePost()"]').classList.add('active');
+    // Open the create post modal instead of navigating to a section
+    const modal = document.getElementById('createPostModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    } else {
+        console.error('Create post modal not found');
+    }
 }
 
 function showProfile() {
-    setActiveNav('profileSection');
-    document.querySelector('[onclick="showProfile()"]').classList.add('active');
-    loadProfile();
+    const profileSection = document.getElementById('profileSection');
+    if (profileSection) {
+        setActiveNav('profileSection');
+        const navLink = document.querySelector('[onclick="showProfile()"]');
+        if (navLink) navLink.classList.add('active');
+        loadProfile();
+    } else {
+        window.location.href = 'profile.html';
+    }
 }
 
 // ========================================
@@ -376,6 +409,7 @@ function showProfile() {
 
 function loadFeed() {
     const feedContainer = document.getElementById('feedPosts');
+    if (!feedContainer) return;
     
     // Get posts from followed users and own posts
     const followingIds = [...currentUser.following, currentUser.id];
@@ -456,6 +490,7 @@ function createPostCard(post) {
 
 function loadExplore() {
     const exploreContainer = document.getElementById('exploreUsers');
+    if (!exploreContainer) return;
     
     // Show all users except current user
     const otherUsers = allUsers.filter(u => u.id !== currentUser.id);
@@ -523,6 +558,7 @@ function searchUsers() {
     );
     
     const exploreContainer = document.getElementById('exploreUsers');
+    if (!exploreContainer) return;
     
     if (filteredUsers.length === 0) {
         exploreContainer.innerHTML = `
@@ -599,11 +635,19 @@ function handleCreatePost(event) {
 window.handleCreatePost = handleCreatePost;
 
 function clearPostForm() {
-    document.getElementById('postTitle').value = '';
-    document.getElementById('postContent').value = '';
-    document.getElementById('postImage').value = '';
-    document.getElementById('postLink').value = '';
-    document.getElementById('postTags').value = '';
+    const postTitle = document.getElementById('postTitle');
+    const postContent = document.getElementById('postContent');
+    const postImage = document.getElementById('postImage');
+    const postLink = document.getElementById('postLink');
+    const postTags = document.getElementById('postTags');
+    const tagInput = document.getElementById('tagInput');
+    
+    if (postTitle) postTitle.value = '';
+    if (postContent) postContent.value = '';
+    if (postImage) postImage.value = '';
+    if (postLink) postLink.value = '';
+    if (postTags) postTags.value = '';
+    if (tagInput) tagInput.value = '';
 }
 
 function loadProfile() {
@@ -617,39 +661,60 @@ function loadProfile() {
     }
     const isOwnProfile = viewingUser.id === currentUser.id;
 
-    // Apply theme and nav info (always current user for nav)
+    // Apply theme
     document.body.className = 'theme-blue';
-    document.getElementById('navUserName').textContent = currentUser.name;
-    document.getElementById('navUserAvatar').src = currentUser.avatar;
-    document.getElementById('mobileUserAvatar').src = currentUser.avatar;
-    document.getElementById('sidebarUserName').textContent = currentUser.name;
-    document.getElementById('sidebarUserEmail').textContent = currentUser.email;
-    document.getElementById('sidebarUserAvatar').src = currentUser.avatar;
+    
+    // Update nav info (check if elements exist first)
+    const navUserName = document.getElementById('navUserName');
+    const navUserAvatar = document.getElementById('navUserAvatar');
+    const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+    const sidebarUserName = document.getElementById('sidebarUserName');
+    const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+    const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
+    
+    if (navUserName) navUserName.textContent = currentUser.name;
+    if (navUserAvatar) navUserAvatar.src = currentUser.avatar;
+    if (mobileUserAvatar) mobileUserAvatar.src = currentUser.avatar;
+    if (sidebarUserName) sidebarUserName.textContent = currentUser.name;
+    if (sidebarUserEmail) sidebarUserEmail.textContent = currentUser.email;
+    if (sidebarUserAvatar) sidebarUserAvatar.src = currentUser.avatar;
 
     // Profile header for viewed user
-    document.getElementById('profileName').textContent = viewingUser.name;
-    const handleEl = document.getElementById('profileHandle');
-    if (handleEl) handleEl.textContent = '@' + viewingUser.username;
-    const emailEl = document.getElementById('profileEmail');
-    if (emailEl) emailEl.textContent = viewingUser.email || '';
-    document.getElementById('profileBio').textContent = viewingUser.bio;
-    document.getElementById('profileAvatar').src = viewingUser.avatar;
-    document.getElementById('profileCover').style.display = viewingUser.coverPhoto ? 'none' : 'block';
-    document.getElementById('profileCoverImage').style.display = viewingUser.coverPhoto ? 'block' : 'none';
-    document.getElementById('profileCoverImage').style.backgroundImage = viewingUser.coverPhoto ? `url(${viewingUser.coverPhoto})` : 'none';
-    const coverElement = document.getElementById('profileCoverImage');
-    if (viewingUser.coverPhoto) {
-        coverElement.style.backgroundSize = 'cover';
-        coverElement.style.backgroundPosition = 'center';
-    } else {
-        coverElement.style.backgroundImage = '';
+    const profileName = document.getElementById('profileName');
+    const profileHandle = document.getElementById('profileHandle');
+    const profileEmail = document.getElementById('profileEmail');
+    const profileBio = document.getElementById('profileBio');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileCover = document.getElementById('profileCover');
+    const profileCoverImage = document.getElementById('profileCoverImage');
+    
+    if (profileName) profileName.textContent = viewingUser.name;
+    if (profileHandle) profileHandle.textContent = '@' + viewingUser.username;
+    if (profileEmail) profileEmail.textContent = viewingUser.email || '';
+    if (profileBio) profileBio.textContent = viewingUser.bio;
+    if (profileAvatar) profileAvatar.src = viewingUser.avatar;
+    
+    if (profileCover) profileCover.style.display = viewingUser.coverPhoto ? 'none' : 'block';
+    if (profileCoverImage) {
+        profileCoverImage.style.display = viewingUser.coverPhoto ? 'block' : 'none';
+        profileCoverImage.style.backgroundImage = viewingUser.coverPhoto ? `url(${viewingUser.coverPhoto})` : 'none';
+        if (viewingUser.coverPhoto) {
+            profileCoverImage.style.backgroundSize = 'cover';
+            profileCoverImage.style.backgroundPosition = 'center';
+        } else {
+            profileCoverImage.style.backgroundImage = '';
+        }
     }
     
     // Update stats
     const userPosts = allPosts.filter(p => p.userId === viewingUser.id);
-    document.getElementById('postCount').textContent = userPosts.length;
-    document.getElementById('followerCount').textContent = viewingUser.followers.length;
-    document.getElementById('followingCount').textContent = viewingUser.following.length;
+    const postCount = document.getElementById('postCount');
+    const followerCount = document.getElementById('followerCount');
+    const followingCount = document.getElementById('followingCount');
+    
+    if (postCount) postCount.textContent = userPosts.length;
+    if (followerCount) followerCount.textContent = viewingUser.followers.length;
+    if (followingCount) followingCount.textContent = viewingUser.following.length;
     
     // Toggle profile actions (edit vs follow)
     const editBtn = document.getElementById('editProfileButton');
@@ -674,6 +739,7 @@ function loadProfile() {
     
     // Load user's posts
     const userPostsContainer = document.getElementById('userPosts');
+    if (!userPostsContainer) return;
     
     if (userPosts.length === 0) {
         userPostsContainer.innerHTML = `
@@ -704,18 +770,26 @@ window.handleProfileFollow = handleProfileFollow;
 window.viewUserProfile = viewUserProfile;
 
 function showEditProfile() {
-    document.getElementById('editProfileModal').style.display = 'flex';
-    document.getElementById('editName').value = currentUser.name;
-    const usernameInput = document.getElementById('editUsername');
-    if (usernameInput) usernameInput.value = currentUser.username;
-    document.getElementById('editBio').value = currentUser.bio;
-    document.getElementById('editAvatar').value = currentUser.avatar;
-    document.getElementById('editAvatarPreview').src = currentUser.avatar;
+    const modal = document.getElementById('editProfileModal');
+    const editName = document.getElementById('editName');
+    const editUsername = document.getElementById('editUsername');
+    const editBio = document.getElementById('editBio');
+    const editAvatar = document.getElementById('editAvatar');
+    const editAvatarPreview = document.getElementById('editAvatarPreview');
+    const editCover = document.getElementById('editCover');
+    const editCoverPreview = document.getElementById('editCoverPreview');
+    
+    if (modal) modal.style.display = 'flex';
+    if (editName) editName.value = currentUser.name;
+    if (editUsername) editUsername.value = currentUser.username;
+    if (editBio) editBio.value = currentUser.bio;
+    if (editAvatar) editAvatar.value = currentUser.avatar;
+    if (editAvatarPreview) editAvatarPreview.src = currentUser.avatar;
     
     // Set cover photo
     if (currentUser.coverPhoto) {
-        document.getElementById('editCover').value = currentUser.coverPhoto;
-        document.getElementById('editCoverPreview').style.backgroundImage = `url(${currentUser.coverPhoto})`;
+        if (editCover) editCover.value = currentUser.coverPhoto;
+        if (editCoverPreview) editCoverPreview.style.backgroundImage = `url(${currentUser.coverPhoto})`;
     }
 }
 
@@ -737,9 +811,12 @@ function handleCoverUpload(event) {
     reader.onload = function(e) {
         const base64Image = e.target.result;
         currentUser.coverPhoto = base64Image;
-        document.getElementById('profileCoverImage').style.backgroundImage = `url(${base64Image})`;
-        document.getElementById('profileCoverImage').style.backgroundSize = 'cover';
-        document.getElementById('profileCoverImage').style.backgroundPosition = 'center';
+        const profileCoverImage = document.getElementById('profileCoverImage');
+        if (profileCoverImage) {
+            profileCoverImage.style.backgroundImage = `url(${base64Image})`;
+            profileCoverImage.style.backgroundSize = 'cover';
+            profileCoverImage.style.backgroundPosition = 'center';
+        }
         saveData();
         showNotification('Cover photo updated!', 'success');
     };
@@ -763,8 +840,10 @@ function handleCoverModalUpload(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         const base64Image = e.target.result;
-        document.getElementById('editCoverPreview').style.backgroundImage = `url(${base64Image})`;
-        document.getElementById('editCover').value = base64Image;
+        const editCoverPreview = document.getElementById('editCoverPreview');
+        const editCover = document.getElementById('editCover');
+        if (editCoverPreview) editCoverPreview.style.backgroundImage = `url(${base64Image})`;
+        if (editCover) editCover.value = base64Image;
         showNotification('Cover image uploaded successfully!', 'success');
     };
     reader.readAsDataURL(file);
@@ -790,8 +869,10 @@ function handleAvatarUpload(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         const base64Image = e.target.result;
-        document.getElementById('editAvatarPreview').src = base64Image;
-        document.getElementById('editAvatar').value = base64Image;
+        const editAvatarPreview = document.getElementById('editAvatarPreview');
+        const editAvatar = document.getElementById('editAvatar');
+        if (editAvatarPreview) editAvatarPreview.src = base64Image;
+        if (editAvatar) editAvatar.value = base64Image;
         showNotification('Image uploaded successfully!', 'success');
     };
     reader.onerror = function() {
@@ -801,7 +882,8 @@ function handleAvatarUpload(event) {
 }
 
 function closeEditProfile() {
-    document.getElementById('editProfileModal').style.display = 'none';
+    const modal = document.getElementById('editProfileModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function handleUpdateProfile(event) {
@@ -840,9 +922,14 @@ function handleUpdateProfile(event) {
     // Apply Ocean Blue theme
     document.body.className = 'theme-blue';
     
-    // Update UI
-    document.getElementById('navUserName').textContent = newName;
-    document.getElementById('navUserAvatar').src = currentUser.avatar;
+    // Update UI (check if elements exist first)
+    const navUserName = document.getElementById('navUserName');
+    const navUserAvatar = document.getElementById('navUserAvatar');
+    if (navUserName) navUserName.textContent = newName;
+    if (navUserAvatar) navUserAvatar.src = currentUser.avatar;
+    
+    // Update sidebar info
+    updateSidebarInfo();
     
     loadProfile();
     showNotification('Profile updated successfully!', 'success');
@@ -927,9 +1014,14 @@ document.head.appendChild(style);
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('editProfileModal');
-    if (event.target === modal) {
+    const editModal = document.getElementById('editProfileModal');
+    const createModal = document.getElementById('createPostModal');
+    
+    if (event.target === editModal) {
         closeEditProfile();
+    }
+    if (event.target === createModal) {
+        closeCreatePost();
     }
 };
 
@@ -954,6 +1046,7 @@ if (allUsers.length === 0) {
         {
             id: generateId(),
             name: 'Sarah Johnson',
+            username: 'sarahjohnson',
             email: 'sarah@example.com',
             password: 'demo123',
             bio: 'Travel blogger & photographer 📸 | Exploring the world one destination at a time',
@@ -966,6 +1059,7 @@ if (allUsers.length === 0) {
         {
             id: generateId(),
             name: 'Mike Chen',
+            username: 'mikechen',
             email: 'mike@example.com',
             password: 'demo123',
             bio: 'Tech enthusiast | Software developer | Coffee addict ☕',
@@ -978,6 +1072,7 @@ if (allUsers.length === 0) {
         {
             id: generateId(),
             name: 'Emma Davis',
+            username: 'emmadavis',
             email: 'emma@example.com',
             password: 'demo123',
             bio: 'Wellness coach | Yoga instructor 🧘‍♀️ | Living mindfully',
@@ -1046,15 +1141,18 @@ window.addEventListener('load', () => {
 
 // Mobile menu toggle
 function toggleMobileMenu() {
-    document.querySelector('.sidebar').classList.toggle('active');
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.classList.toggle('active');
 }
 
-// Enhanced navigation with active states
+// Enhanced navigation with active states (overrides earlier simpler version)
 function setActiveNav(sectionId) {
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     document.querySelectorAll('.mobile-nav-link').forEach(link => link.classList.remove('active'));
     document.querySelectorAll('.content-section').forEach(sec => sec.style.display = 'none');
-    document.getElementById(sectionId).style.display = 'block';
+    
+    const sectionElement = document.getElementById(sectionId);
+    if (sectionElement) sectionElement.style.display = 'block';
     
     const targetLink = document.querySelector(`[onclick*="${sectionId.replace('Section', '')}"]`);
     if (targetLink) targetLink.classList.add('active');
@@ -1064,6 +1162,8 @@ function setActiveNav(sectionId) {
 function showTrending() {
     setActiveNav('trendingSection');
     const container = document.getElementById('trendingPosts');
+    if (!container) return;
+    
     const sortedPosts = [...allPosts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
     if (sortedPosts.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);"><i class="fas fa-fire" style="font-size:64px;margin-bottom:20px;opacity:0.3;"></i><h3>No trending posts yet</h3><p>Be the first to create content!</p></div>';
@@ -1077,7 +1177,9 @@ let bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
 
 function showBookmarks() {
     setActiveNav('bookmarksSection');
-    const container = document.getElementById('bookmarkPosts');
+    const container = document.getElementById('bookmarksPosts');
+    if (!container) return;
+    
     const bookmarkedPosts = allPosts.filter(p => bookmarks.includes(p.id));
     if (bookmarkedPosts.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:60px;color:var(--text-muted);"><i class="fas fa-bookmark" style="font-size:64px;margin-bottom:20px;opacity:0.3;"></i><h3>No bookmarks yet</h3><p>Save posts to read them later!</p></div>';
@@ -1091,7 +1193,7 @@ let currentFilter = 'all';
 function filterFeed(filter) {
     currentFilter = filter;
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
     loadFeed();
 }
 
@@ -1100,7 +1202,7 @@ let currentUserFilter = 'all';
 function filterUsers(filter) {
     currentUserFilter = filter;
     document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) event.target.classList.add('active');
     loadExplore();
 }
 
@@ -1127,6 +1229,8 @@ function handleTagInput(event) {
 
 function renderTags() {
     const container = document.getElementById('tagsContainer');
+    if (!container) return;
+    
     container.innerHTML = currentTags.map(tag => `
         <span class="tag-item">
             ${tag}
@@ -1172,18 +1276,27 @@ window.openCreatePost = openCreatePost;
 window.closeCreatePost = closeCreatePost;
 
 // Image preview
-function previewImage() {
-    const url = document.getElementById('postImage').value;
+function previewImage(urlOrEvent) {
+    // Handle both direct URL string and input event
+    let url;
+    if (typeof urlOrEvent === 'string') {
+        url = urlOrEvent;
+    } else {
+        url = document.getElementById('postImage').value;
+    }
     const preview = document.getElementById('imagePreview');
-    if (url) {
+    if (url && preview) {
         preview.style.display = 'block';
-        preview.querySelector('img').src = url;
+        const img = preview.querySelector('img');
+        if (img) img.src = url;
     }
 }
 
 function removeImagePreview() {
-    document.getElementById('postImage').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
+    const postImage = document.getElementById('postImage');
+    const imagePreview = document.getElementById('imagePreview');
+    if (postImage) postImage.value = '';
+    if (imagePreview) imagePreview.style.display = 'none';
 }
 
 // Make image functions globally accessible
@@ -1259,27 +1372,54 @@ function calculatePasswordStrength(password) {
 }
 
 // Profile tabs
-function showProfileTab(tabName) {
+function showProfileTab(tabName, evt) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
     
-    event.target.classList.add('active');
-    document.getElementById(`profile${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`).style.display = 'block';
+    // Use passed event or global event
+    const targetEvent = evt || event;
+    if (targetEvent && targetEvent.target) {
+        targetEvent.target.classList.add('active');
+    }
+    
+    const tabElement = document.getElementById(`profile${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`);
+    if (tabElement) tabElement.style.display = 'block';
 }
 
 // Update sidebar user info
 function updateSidebarInfo() {
     if (currentUser) {
-        document.getElementById('sidebarUserName').textContent = currentUser.name;
-        document.getElementById('sidebarUserEmail').textContent = currentUser.email;
-        document.getElementById('sidebarUserAvatar').src = currentUser.avatar;
-        document.getElementById('mobileUserAvatar').src = currentUser.avatar;
+        const sidebarUserName = document.getElementById('sidebarUserName');
+        const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+        const sidebarUserAvatar = document.getElementById('sidebarUserAvatar');
+        const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+        
+        if (sidebarUserName) sidebarUserName.textContent = currentUser.name;
+        if (sidebarUserEmail) sidebarUserEmail.textContent = currentUser.email;
+        if (sidebarUserAvatar) sidebarUserAvatar.src = currentUser.avatar;
+        if (mobileUserAvatar) mobileUserAvatar.src = currentUser.avatar;
     }
 }
 
-// Enhanced create post with tags
-const originalHandleCreatePost = handleCreatePost;
-handleCreatePost = function(event) {
+// Delete post function
+function deletePost(postId) {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    
+    const postIndex = allPosts.findIndex(p => p.id === postId);
+    if (postIndex !== -1) {
+        allPosts.splice(postIndex, 1);
+        saveData();
+        showNotification('Post deleted successfully!', 'success');
+        
+        // Refresh the current view
+        if (typeof loadFeed === 'function') loadFeed();
+        if (typeof loadProfile === 'function') loadProfile();
+    }
+}
+window.deletePost = deletePost;
+
+// Enhanced handleCreatePost wrapper that includes tags
+window.handleCreatePost = function(event) {
     event.preventDefault();
     
     const title = document.getElementById('postTitle').value;
@@ -1303,18 +1443,49 @@ handleCreatePost = function(event) {
     
     clearPostForm();
     currentTags = [];
-    renderTags();
+    if (typeof renderTags === 'function') renderTags();
+    closeCreatePost();
     showNotification('Post published successfully!', 'success');
-    showFeed();
-}
+    if (typeof loadFeed === 'function') loadFeed();
+};
 
-// Enhanced clear post form
-const originalClearPostForm = clearPostForm;
-clearPostForm = function() {
-    originalClearPostForm();
+// Enhanced clearPostForm that resets tags and image preview
+const originalClearPostFormFn = clearPostForm;
+function enhancedClearPostForm() {
+    originalClearPostFormFn();
     currentTags = [];
-    renderTags();
-    document.getElementById('imagePreview').style.display = 'none';
+    if (typeof renderTags === 'function') renderTags();
+    const preview = document.getElementById('imagePreview');
+    if (preview) preview.style.display = 'none';
 }
+window.clearPostForm = enhancedClearPostForm;
+
+// Export all necessary functions to window for HTML onclick handlers
+window.showTrending = showTrending;
+window.showBookmarks = showBookmarks;
+window.filterFeed = filterFeed;
+window.filterUsers = filterUsers;
+window.clearSearch = clearSearch;
+window.toggleMobileMenu = toggleMobileMenu;
+window.showFeed = showFeed;
+window.showExplore = showExplore;
+window.showProfile = loadProfile;
+window.showCreatePost = showCreatePost;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.handleLogout = handleLogout;
+window.showEditProfile = showEditProfile;
+window.closeEditProfile = closeEditProfile;
+window.handleUpdateProfile = handleUpdateProfile;
+window.toggleFollow = toggleFollow;
+window.searchUsers = searchUsers;
+window.handleCoverUpload = handleCoverUpload;
+window.handleCoverModalUpload = handleCoverModalUpload;
+window.handleAvatarUpload = handleAvatarUpload;
+window.showProfileTab = showProfileTab;
+window.handleSocialLogin = handleSocialLogin;
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.showNotification = showNotification;
 
 console.log('✓ WriteBlog Professional Edition Loaded');
