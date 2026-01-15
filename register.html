@@ -98,33 +98,35 @@
         </div>
     </div>
 
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
-            // Initialize Supabase first
+            console.log('Register page loaded');
+            
+            // Hide loading screen immediately
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            
+            // Initialize Supabase (optional)
             try {
                 if (typeof initSupabase === 'function') initSupabase();
             } catch (e) {
-                console.warn('Supabase init warning:', e);
+                console.warn('Supabase not available, using localStorage');
             }
             
-            // Initialize data - MUST happen before checking currentUser
+            // Initialize data from localStorage
             try {
                 if (typeof initializeData === 'function') {
                     initializeData();
-                    console.log('Data initialized, currentUser:', currentUser);
+                    console.log('Data initialized. Users:', allUsers.length);
                 }
             } catch (e) {
                 console.error('Data init error:', e);
             }
             
-            // Hide loading screen first
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) loadingScreen.style.display = 'none';
-            
-            // Check if already logged in (after data is loaded)
-            if (currentUser && currentUser.id) {
-                console.log('User already logged in, redirecting to feed');
+            // Check if already logged in
+            if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
+                console.log('Already logged in as:', currentUser.name);
                 window.location.href = 'feed.html';
             }
             
@@ -135,10 +137,14 @@
                     const password = e.target.value;
                     const strengthBar = document.querySelector('.password-strength-bar');
                     if (strengthBar) {
-                        const strength = typeof calculatePasswordStrength === 'function' 
-                            ? calculatePasswordStrength(password) 
-                            : 0;
-                        strengthBar.style.width = `${strength}%`;
+                        let strength = 0;
+                        if (password.length >= 6) strength += 30;
+                        if (password.length >= 10) strength += 20;
+                        if (/[a-z]/.test(password)) strength += 15;
+                        if (/[A-Z]/.test(password)) strength += 15;
+                        if (/[0-9]/.test(password)) strength += 10;
+                        if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+                        strengthBar.style.width = `${Math.min(strength, 100)}%`;
                     }
                 });
             }

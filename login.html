@@ -93,36 +93,38 @@
         </div>
     </div>
 
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
     <script>
         // Wait for script.js to load, then initialize
         window.addEventListener('DOMContentLoaded', function() {
-            // Initialize Supabase first
+            console.log('Login page loaded');
+            
+            // Hide loading screen immediately
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            
+            // Initialize Supabase (optional - localStorage works without it)
             try {
                 if (typeof initSupabase === 'function') {
                     initSupabase();
                 }
             } catch (e) {
-                console.warn('Supabase init warning:', e);
+                console.warn('Supabase not available, using localStorage');
             }
             
-            // Initialize data - MUST happen before checking currentUser
+            // Initialize data from localStorage
             try {
                 if (typeof initializeData === 'function') {
                     initializeData();
-                    console.log('Data initialized, currentUser:', currentUser);
+                    console.log('Data initialized. Users:', allUsers.length, 'Current user:', currentUser?.name || 'none');
                 }
             } catch (e) {
                 console.error('Data init error:', e);
             }
             
-            // Hide loading screen first
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) loadingScreen.style.display = 'none';
-            
-            // Check if already logged in (after data is loaded)
-            if (currentUser && currentUser.id) {
-                console.log('User already logged in, redirecting to feed');
+            // Check if already logged in
+            if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
+                console.log('Already logged in as:', currentUser.name);
                 window.location.href = 'feed.html';
             }
         });

@@ -581,6 +581,33 @@
         </nav>
     </div>
 
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Index page loaded');
+            
+            // Hide loading screen
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            
+            // Initialize Supabase (optional)
+            try {
+                if (typeof initSupabase === 'function') initSupabase();
+            } catch (e) {}
+            
+            // Initialize data from localStorage
+            try {
+                if (typeof initializeData === 'function') initializeData();
+            } catch (e) {
+                console.error('Data init error:', e);
+            }
+            
+            // Check if already logged in
+            if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
+                console.log('Already logged in, redirecting to feed');
+                window.location.href = 'feed.html';
+            }
+        });
+    </script>
 </body>
 </html>

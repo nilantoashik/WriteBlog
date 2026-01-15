@@ -205,54 +205,47 @@
         <i class="fas fa-plus"></i>
     </button>
 
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
     <script>
-        window.addEventListener('DOMContentLoaded', async function() {
-            // Initialize Supabase and data
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Feed page loaded');
+            
+            // Initialize Supabase (optional)
             try {
                 if (typeof initSupabase === 'function') initSupabase();
-                if (typeof initializeData === 'function') initializeData();
-            } catch (e) {}
-            
-            // Handle OAuth callback
-            if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured() && typeof supabase !== 'undefined' && supabase) {
-                try {
-                    const { data: { session }, error } = await supabase.auth.getSession();
-                    if (session && session.user) {
-                        // OAuth login successful - create/update user
-                        const authUser = session.user;
-                        let user = await getUserByEmail(authUser.email);
-                        
-                        if (!user) {
-                            // Create new user from OAuth
-                            user = await createUser({
-                                name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email.split('@')[0],
-                                email: authUser.email,
-                                password: generateId(),
-                                bio: 'Joined via social login',
-                                avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || getDefaultAvatar(authUser.email),
-                                socialProvider: authUser.app_metadata?.provider || 'oauth'
-                            });
-                        }
-                        
-                        // Set as current user
-                        currentUser = user;
-                        saveCurrentUser(user);
-                        showNotification(`Welcome back, ${user.name}!`, 'success');
-                    }
-                } catch (error) {
-                    console.log('OAuth callback check:', error.message);
-                }
+            } catch (e) {
+                console.warn('Supabase not available');
             }
             
-            // Check authentication
-            if (typeof currentUser === 'undefined' || !currentUser) {
+            // Initialize data from localStorage
+            try {
+                if (typeof initializeData === 'function') {
+                    initializeData();
+                    console.log('Data initialized. Current user:', currentUser?.name || 'none');
+                }
+            } catch (e) {
+                console.error('Data init error:', e);
+            }
+            
+            // Check authentication - redirect to login if not logged in
+            if (typeof currentUser === 'undefined' || !currentUser || !currentUser.id) {
+                console.log('No user logged in, redirecting to login');
                 window.location.href = 'login.html';
-            } else {
-                // Initialize page
-                document.body.className = 'theme-blue';
-                if (typeof updateSidebarInfo === 'function') updateSidebarInfo();
-                if (typeof showFeed === 'function') showFeed();
+                return;
+            }
+            
+            // User is logged in - initialize the page
+            console.log('User authenticated:', currentUser.name);
+            document.body.className = 'theme-blue';
+            
+            // Update sidebar with user info
+            if (typeof updateSidebarInfo === 'function') {
+                updateSidebarInfo();
+            }
+            
+            // Load the feed
+            if (typeof loadFeed === 'function') {
+                loadFeed();
             }
         });
     </script>

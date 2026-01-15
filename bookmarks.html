@@ -185,52 +185,33 @@
         <i class="fas fa-plus"></i>
     </button>
 
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
     <script>
-        window.addEventListener('DOMContentLoaded', async function() {
-            // Initialize Supabase and data
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('Bookmarks page loaded');
+            
+            // Initialize Supabase (optional)
             try {
                 if (typeof initSupabase === 'function') initSupabase();
-                if (typeof initializeData === 'function') initializeData();
             } catch (e) {}
             
-            // Handle OAuth callback
-            if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured() && typeof supabase !== 'undefined' && supabase) {
-                try {
-                    const { data: { session }, error } = await supabase.auth.getSession();
-                    if (session && session.user) {
-                        const authUser = session.user;
-                        let user = await getUserByEmail(authUser.email);
-                        
-                        if (!user) {
-                            user = await createUser({
-                                name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || authUser.email.split('@')[0],
-                                email: authUser.email,
-                                password: generateId(),
-                                bio: 'Joined via social login',
-                                avatar: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || getDefaultAvatar(authUser.email),
-                                socialProvider: authUser.app_metadata?.provider || 'oauth'
-                            });
-                        }
-                        
-                        currentUser = user;
-                        saveCurrentUser(user);
-                        showNotification(`Welcome, ${user.name}!`, 'success');
-                    }
-                } catch (error) {
-                    console.log('OAuth callback check:', error.message);
-                }
+            // Initialize data from localStorage
+            try {
+                if (typeof initializeData === 'function') initializeData();
+            } catch (e) {
+                console.error('Data init error:', e);
             }
             
             // Check authentication
-            if (typeof currentUser === 'undefined' || !currentUser) {
+            if (typeof currentUser === 'undefined' || !currentUser || !currentUser.id) {
                 window.location.href = 'login.html';
-            } else {
-                // Initialize page
-                document.body.className = 'theme-blue';
-                if (typeof updateSidebarInfo === 'function') updateSidebarInfo();
-                if (typeof showBookmarks === 'function') showBookmarks();
+                return;
             }
+            
+            // Initialize page
+            document.body.className = 'theme-blue';
+            if (typeof updateSidebarInfo === 'function') updateSidebarInfo();
+            if (typeof loadBookmarks === 'function') loadBookmarks();
         });
     </script>
 </body>
