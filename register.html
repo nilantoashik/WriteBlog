@@ -98,25 +98,34 @@
         </div>
     </div>
 
-    <script src="script.js?v=18"></script>
+    <script src="script.js?v=19"></script>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
             // Initialize Supabase first
             try {
                 if (typeof initSupabase === 'function') initSupabase();
-            } catch (e) {}
+            } catch (e) {
+                console.warn('Supabase init warning:', e);
+            }
             
-            // Initialize data
+            // Initialize data - MUST happen before checking currentUser
             try {
-                if (typeof initializeData === 'function') initializeData();
-            } catch (e) {}
+                if (typeof initializeData === 'function') {
+                    initializeData();
+                    console.log('Data initialized, currentUser:', currentUser);
+                }
+            } catch (e) {
+                console.error('Data init error:', e);
+            }
             
-            // Check if already logged in
-            if (typeof currentUser !== 'undefined' && currentUser) {
+            // Hide loading screen first
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            
+            // Check if already logged in (after data is loaded)
+            if (currentUser && currentUser.id) {
+                console.log('User already logged in, redirecting to feed');
                 window.location.href = 'feed.html';
-            } else {
-                // Hide loading screen
-                document.getElementById('loadingScreen').style.display = 'none';
             }
             
             // Password strength indicator
@@ -126,7 +135,9 @@
                     const password = e.target.value;
                     const strengthBar = document.querySelector('.password-strength-bar');
                     if (strengthBar) {
-                        const strength = calculatePasswordStrength(password);
+                        const strength = typeof calculatePasswordStrength === 'function' 
+                            ? calculatePasswordStrength(password) 
+                            : 0;
                         strengthBar.style.width = `${strength}%`;
                     }
                 });

@@ -128,19 +128,27 @@ function showRegister() {
 function handleLogin(event) {
     event.preventDefault();
     
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+    
+    console.log('Login attempt for:', email);
+    console.log('Total users in system:', allUsers.length);
     
     const user = allUsers.find(u => u.email === email && u.password === password);
     
     if (user) {
         currentUser = user;
-        saveData();
+        // Save to localStorage explicitly
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('blogUsers', JSON.stringify(allUsers));
+        console.log('Login successful, saved currentUser:', currentUser.name);
         showNotification('Welcome back, ' + user.name + '!', 'success');
+        // Redirect immediately
         setTimeout(() => {
             window.location.href = 'feed.html';
-        }, 500);
+        }, 300);
     } else {
+        console.log('Login failed - user not found or password mismatch');
         showNotification('Invalid email or password', 'error');
     }
 }
@@ -148,11 +156,14 @@ function handleLogin(event) {
 function handleRegister(event) {
     event.preventDefault();
     
-    const name = document.getElementById('regName').value;
-    const usernameInput = document.getElementById('regUsername')?.value || '';
-    const email = document.getElementById('regEmail').value;
+    const name = document.getElementById('regName').value.trim();
+    const usernameInput = document.getElementById('regUsername')?.value?.trim() || '';
+    const email = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value;
-    const bio = document.getElementById('regBio').value;
+    const bioEl = document.getElementById('regBio');
+    const bio = bioEl ? bioEl.value.trim() : '';
+    
+    console.log('Registration attempt for:', email);
     
     // Check if email already exists
     if (allUsers.find(u => u.email === email)) {
@@ -165,6 +176,7 @@ function handleRegister(event) {
         showNotification('Username already taken', 'error');
         return;
     }
+    
     const newUser = {
         id: generateId(),
         name: name,
@@ -181,11 +193,21 @@ function handleRegister(event) {
     
     allUsers.push(newUser);
     currentUser = newUser;
-    saveData();
+    
+    // Save to localStorage explicitly
+    localStorage.setItem('blogUsers', JSON.stringify(allUsers));
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    console.log('Registration successful, user created:', currentUser.name);
+    console.log('Total users now:', allUsers.length);
+    
     showNotification('Account created successfully!', 'success');
+    
+    // Redirect immediately
     setTimeout(() => {
+        console.log('Redirecting to feed.html');
         window.location.href = 'feed.html';
-    }, 500);
+    }, 300);
 }
 
 function handleLogout() {

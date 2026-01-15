@@ -75,12 +75,25 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </form>
+                <div class="divider">
+                    <span>or</span>
+                </div>
+                <div class="social-auth">
+                    <button type="button" class="btn-social" onclick="handleSocialLogin('google')">
+                        <i class="fab fa-google"></i>
+                        <span>Continue with Google</span>
+                    </button>
+                    <button type="button" class="btn-social" onclick="handleSocialLogin('github')">
+                        <i class="fab fa-github"></i>
+                        <span>Continue with GitHub</span>
+                    </button>
+                </div>
                 <p class="auth-switch">Don't have an account? <a href="register.html">Create Account</a></p>
             </div>
         </div>
     </div>
 
-    <script src="script.js?v=18"></script>
+    <script src="script.js?v=19"></script>
     <script>
         // Wait for script.js to load, then initialize
         window.addEventListener('DOMContentLoaded', function() {
@@ -93,21 +106,24 @@
                 console.warn('Supabase init warning:', e);
             }
             
-            // Initialize data
+            // Initialize data - MUST happen before checking currentUser
             try {
                 if (typeof initializeData === 'function') {
                     initializeData();
+                    console.log('Data initialized, currentUser:', currentUser);
                 }
             } catch (e) {
-                console.warn('Data init warning:', e);
+                console.error('Data init error:', e);
             }
             
-            // Check if already logged in
-            if (typeof currentUser !== 'undefined' && currentUser) {
+            // Hide loading screen first
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            
+            // Check if already logged in (after data is loaded)
+            if (currentUser && currentUser.id) {
+                console.log('User already logged in, redirecting to feed');
                 window.location.href = 'feed.html';
-            } else {
-                // Hide loading screen
-                document.getElementById('loadingScreen').style.display = 'none';
             }
         });
     </script>
